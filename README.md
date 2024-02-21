@@ -2,8 +2,6 @@
 
 ###
 
-<br clear="both">
-
 <img align="right" height="250" src="https://i.pinimg.com/564x/4f/88/ea/4f88eaccb8e98293f647370242e8c54d.jpg"  />
 
 ###
@@ -45,6 +43,6 @@
 
 ###
 
-<img src="https://raw.githubusercontent.com/admin12121/admin12121/output/snake.svg" alt="Snake animation" />
+<img src="https://raw.githubusercontent.com/Admin12121/Admin12121/output/snake.svg" alt="Snake animation" />
 
 ###

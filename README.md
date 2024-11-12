@@ -2,8 +2,6 @@
 
 ###
 
-<img align="right" height="250" src="https://i.pinimg.com/564x/4f/88/ea/4f88eaccb8e98293f647370242e8c54d.jpg"  />
-
 ###
 
 <div align="left">
@@ -41,11 +39,6 @@
 
 ###
 
-<div align="left">
-  <a href="https://open.spotify.com/user/31o6k3ulhkndjcb2sjzxearoublm">
-    <img src="https://spotify-recently-played-readme.vercel.app/api?user=31o6k3ulhkndjcb2sjzxearoublm&count=1&unique=true" alt="Spotify recently played"  />
-  </a>
-</div>
 
 ###
 

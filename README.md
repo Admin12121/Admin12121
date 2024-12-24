@@ -1,4 +1,4 @@
-### I do fullstack
+### I am Full-Stack Developer
 
 ![My Skills](https://skillicons.dev/icons?i=html,css,js,ts,python,react,nextjs,django,prisma,docker)
 

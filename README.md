@@ -1,14 +1,17 @@
-### I am Full-Stack Developer. I work on a ton of random projects in my free time.
-Check out my [portfolio](https://vickytajpuriya.com).
-
-![My Skills](https://skillicons.dev/icons?i=c,js,ts,python,react,nextjs,django,prisma,redis,docker)
-
-<details>
-  <summary>Github Stats ⚡</summary>
-  
-  <a href="#">![Github stats](https://github-readme-stats.vercel.app/api?username=admin12121&theme=discord_old_blurple&count_private=true&hide_border=true&line_height=20&rank_icon=github)</a>
-</details>
-
-###
-<img src="https://raw.githubusercontent.com/Admin12121/Admin12121/output/snake.svg" alt="Snake animation" />
-
+<img src="https://raw.githubusercontent.com/Admin12121/Admin12121/refs/heads/main/images/ghost.webp" alt="venom" align=center/>
+<h3 align="center">Red Team Operator & Developer</h3>
+<p align="center"><i>Break. Adapt. Dominate.</i></p>
+<p align="center">
+  <a href="https://biki.com.np/blog">
+    <img src="https://img.shields.io/badge/-Blog-111111?style=for-the-badge&logo=rss&logoColor=white" alt="Blog"/>
+  </a>
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/archlinux/archlinux-original.svg" alt="Arch Linux" width="32" height="32"/>
+  <a href="https://twitter.com/yourtwitter">
+    <img src="https://img.shields.io/badge/-Twitter-111111?style=for-the-badge&logo=x&logoColor=white" alt="Twitter"/>
+  </a>
+</p>
+<hr>
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=linux" alt="My Skills"> </br>
+  <img src="https://skillicons.dev/icons?i=rust,python,ts,docker" alt="My Skills">
+</p>

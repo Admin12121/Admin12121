@@ -6,7 +6,7 @@
     <img src="https://img.shields.io/badge/-Blog-111111?style=for-the-badge&logo=rss&logoColor=white" alt="Blog"/>
   </a>
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/archlinux/archlinux-original.svg" alt="Arch Linux" width="32" height="32"/>
-  <a href="https://twitter.com/yourtwitter">
+  <a href="https://twitter.com/@dmin12121">
     <img src="https://img.shields.io/badge/-Twitter-111111?style=for-the-badge&logo=x&logoColor=white" alt="Twitter"/>
   </a>
 </p>

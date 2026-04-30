@@ -1,17 +1,24 @@
-<img src="https://raw.githubusercontent.com/Admin12121/Admin12121/refs/heads/main/images/ghost.webp" alt="venom" align=center/>
-<h3 align="center">Red Team Operator & Developer</h3>
-<p align="center"><i>Break. Adapt. Dominate.</i></p>
-<p align="center">
-  <a href="https://biki.com.np/blog">
-    <img src="https://img.shields.io/badge/-Blog-111111?style=for-the-badge&logo=rss&logoColor=white" alt="Blog"/>
-  </a>
-  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/archlinux/archlinux-original.svg" alt="Arch Linux" width="32" height="32"/>
-  <a href="https://twitter.com/@dmin12121">
-    <img src="https://img.shields.io/badge/-Twitter-111111?style=for-the-badge&logo=x&logoColor=white" alt="Twitter"/>
-  </a>
-</p>
-<hr>
-<p align="center">
-  <img src="https://skillicons.dev/icons?i=linux" alt="My Skills"> </br>
-  <img src="https://skillicons.dev/icons?i=rust,python,ts,docker" alt="My Skills">
-</p>
+<a href="https://github.com/PenguinDevs/PenguinDevs">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/PenguinDevs/PenguinDevs/main/dark-mode.svg">
+    <img alt="PenguinDevs's GitHub Profile README" src="https://raw.githubusercontent.com/PenguinDevs/PenguinDevs/main/light-mode.svg">
+  </picture>
+  <div align="center" style="margin-top: 36px">
+    <p>
+      <a href="https://discord.gg/xq25Exwf3X">
+        <img src="https://img.shields.io/discord/1393987779343679649?color=5865F2&label=discord&logo=discord&logoColor=white" alt="Discord" />
+      </a>
+      <a href="https://x.com/PenguinDevs">
+        <img alt="X (formerly Twitter) Follow" src="https://img.shields.io/twitter/follow/PenguinDevs">
+      </a>
+    </p>
+    <p>
+      <a href="https://www.linkedin.com/in/jason-yi-penguindevs/">
+        <img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-blue">
+      </a>
+      <a href="https://penguindevs.me/">
+        <img alt="LinkedIn" src="https://img.shields.io/badge/Projects-purple">
+      </a>
+    </p>
+  </div>
+</a>

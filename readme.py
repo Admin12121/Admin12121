@@ -30,7 +30,7 @@ GH_HEADERS = {"authorization": f"token {os.environ['ACCESS_TOKEN']}"}
 
 USER_NAME = os.environ["USER_NAME"]
 MY_ID = "U_kgDOB91p6Q"  # Admin12121
-BIRTHDAY = datetime(2006, 10, 20)
+BIRTHDAY = datetime(2004, 9, 9)
 
 QUERY_COUNT = {
     "user_getter": 0,
@@ -117,20 +117,26 @@ def simple_request(
     """
     Returns a response, or raises an Exception if the response does not succeed.
     """
-    response = requests.post(
-        "https://api.github.com/graphql",
-        json={"query": query, "variables": variables},
-        headers=GH_HEADERS,
-    )
-    if response.status_code == 200:
-        return response
+    retryable_statuses = {429, 502, 503, 504}
+    attempts = 3
 
-    if raise_exception:
-        raise Exception(
-            f"Failed with a {response.status_code}: {response.text}, {QUERY_COUNT}"
+    for attempt in range(attempts):
+        response = requests.post(
+            "https://api.github.com/graphql",
+            json={"query": query, "variables": variables},
+            headers=GH_HEADERS,
         )
-    else:
-        return response
+        if response.status_code == 200:
+            return response
+
+        if response.status_code not in retryable_statuses or attempt == attempts - 1:
+            if raise_exception:
+                raise Exception(
+                    f"Failed with a {response.status_code}: {response.text}, {QUERY_COUNT}"
+                )
+            return response
+
+        time.sleep(1 << attempt)
 
 
 def graph_commits(start_date: datetime, end_date: datetime) -> int:

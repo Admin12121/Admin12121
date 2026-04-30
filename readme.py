@@ -222,6 +222,7 @@ def loc_counter_one_repo(
     addition_total: int,
     deletion_total: int,
     my_commits: int,
+    cache_line: str | None = None,
 ) -> tuple[int, int, int]:
     """
     Recursively call recursive_loc (since GraphQL can only search 100 commits at
@@ -245,7 +246,20 @@ def loc_counter_one_repo(
             deletion_total,
             my_commits,
             history["pageInfo"]["endCursor"],
+            cache_line,
         )
+
+
+def _cached_loc_from_line(cache_line: str | None) -> tuple[int, int, int]:
+    """Return cached LOC values from a cache entry when a live fetch fails."""
+    if not cache_line:
+        return 0, 0, 0
+
+    parts = cache_line.split()
+    if len(parts) < 5:
+        return 0, 0, 0
+
+    return int(parts[3]), int(parts[4]), int(parts[2])
 
 
 def recursive_loc(
@@ -257,6 +271,7 @@ def recursive_loc(
     deletion_total: int = 0,
     my_commits: int = 0,
     cursor: str | None = None,
+    cache_line: str | None = None,
 ) -> tuple[int, int, int]:
     """
     Uses GitHub's GraphQL v4 API and cursor pagination to fetch 100 commits from
@@ -312,9 +327,13 @@ def recursive_loc(
                 addition_total,
                 deletion_total,
                 my_commits,
+                cache_line,
             )
         else:
             return 0, 0, 0
+
+    if request.status_code in {429, 502, 503, 504}:
+        return _cached_loc_from_line(cache_line)
 
     force_close_file(
         data, cache_comment
@@ -389,7 +408,13 @@ def cache_builder(
                 ):
                     # if commit count has changed, update loc for that repo
                     owner, repo_name = edges[index]["node"]["nameWithOwner"].split("/")
-                    loc = recursive_loc(owner, repo_name, data, cache_comment)
+                    loc = recursive_loc(
+                        owner,
+                        repo_name,
+                        data,
+                        cache_comment,
+                        cache_line=data[index],
+                    )
                     data[index] = (
                         repo_hash
                         + " "

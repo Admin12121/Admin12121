@@ -1,24 +1,9 @@
-<a href="https://github.com/PenguinDevs/PenguinDevs">
+<a href="https://admin12121.com">
+  <img src="https://raw.githubusercontent.com/Admin12121/Admin12121/refs/heads/main/images/ghost.webp" alt="venom" align=center/>
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/PenguinDevs/PenguinDevs/main/dark-mode.svg">
-    <img alt="PenguinDevs's GitHub Profile README" src="https://raw.githubusercontent.com/PenguinDevs/PenguinDevs/main/light-mode.svg">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/admin12121/admin12121/main/dark-mode.svg">
+    <img alt="PenguinDevs's GitHub Profile README" src="https://raw.githubusercontent.com/admin12121/admin12121/main/light-mode.svg">
   </picture>
-  <div align="center" style="margin-top: 36px">
-    <p>
-      <a href="https://discord.gg/xq25Exwf3X">
-        <img src="https://img.shields.io/discord/1393987779343679649?color=5865F2&label=discord&logo=discord&logoColor=white" alt="Discord" />
-      </a>
-      <a href="https://x.com/PenguinDevs">
-        <img alt="X (formerly Twitter) Follow" src="https://img.shields.io/twitter/follow/PenguinDevs">
-      </a>
-    </p>
-    <p>
-      <a href="https://www.linkedin.com/in/jason-yi-penguindevs/">
-        <img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-blue">
-      </a>
-      <a href="https://penguindevs.me/">
-        <img alt="LinkedIn" src="https://img.shields.io/badge/Projects-purple">
-      </a>
-    </p>
-  </div>
+  <h3 align="center">Red Team Operator & Developer</h3>
+  <p align="center"><i>Proud lesbian rights activist and a Sapiophile</i></p>
 </a>

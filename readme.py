@@ -237,9 +237,25 @@ def graph_repos_stars(
             )
         return int(total_count)
     elif count_type == "stars":
-        edges = repositories.get("edges") or []
+        # Do not turn missing/null API data into an empty list: that would
+        # silently publish a misleading star count of 0.
+        edges = repositories.get("edges")
         if not isinstance(edges, list):
-            raise RuntimeError("GitHub GraphQL repositories.edges was not a list.")
+            graph_errors = payload.get("errors", [])
+            raise RuntimeError(
+                "GitHub GraphQL did not return a valid repositories.edges list "
+                f"for the star query. totalCount={repositories.get('totalCount')!r}; "
+                f"errors={graph_errors!r}"
+            )
+
+        total_count = repositories.get("totalCount")
+        if isinstance(total_count, int) and total_count > 0 and not edges:
+            raise RuntimeError(
+                "GitHub reported repositories.totalCount="
+                f"{total_count}, but returned no repository edges for the star query. "
+                f"GraphQL errors: {payload.get('errors', [])!r}"
+            )
+
         return stars_counter(edges)
 
     return 0
@@ -620,6 +636,7 @@ def stars_counter(data: list[dict[str, Any]]) -> int:
     """Count stars, safely skipping repository entries that GitHub returned as null."""
     total_stars = 0
     skipped_entries = 0
+    valid_entries = 0
 
     for edge in data:
         # Repository edges can contain a null node when GitHub cannot return a
@@ -644,12 +661,22 @@ def stars_counter(data: list[dict[str, Any]]) -> int:
             continue
 
         total_stars += star_count
+        valid_entries += 1
 
     if skipped_entries:
         print(
             f"Warning: skipped {skipped_entries} repository entr"
             f"{'y' if skipped_entries == 1 else 'ies'} because GitHub returned "
             "missing or null star data. The displayed star total may be incomplete."
+        )
+
+    # If the API returned edges but none contain usable star data, do not
+    # mistake the failed response for a genuine total of zero stars.
+    if data and valid_entries == 0:
+        raise RuntimeError(
+            "GitHub returned repository edges, but none contained usable "
+            "stargazers.totalCount values. Check the GraphQL warning/error messages "
+            "printed above; refusing to publish a misleading star count of 0."
         )
 
     return total_stars

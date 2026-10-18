@@ -202,13 +202,45 @@ def graph_repos_stars(
         "cursor": cursor,
     }
     request = simple_request(query, variables)
-    if request.status_code == 200:
-        if count_type == "repos":
-            return request.json()["data"]["user"]["repositories"]["totalCount"]
-        elif count_type == "stars":
-            return stars_counter(
-                request.json()["data"]["user"]["repositories"]["edges"]
+    payload = request.json()
+
+    # GraphQL can return HTTP 200 alongside partial data and an "errors" list.
+    # Print those errors so missing/null repository nodes are diagnosable in Actions.
+    for error in payload.get("errors", []):
+        message = error.get("message", "Unknown GraphQL error")
+        path = error.get("path")
+        if path:
+            print(f"GitHub GraphQL warning (path {path}): {message}")
+        else:
+            print(f"GitHub GraphQL warning: {message}")
+
+    data = payload.get("data") or {}
+    user = data.get("user")
+    if not isinstance(user, dict):
+        raise RuntimeError(
+            f"GitHub GraphQL response did not include user data for {USER_NAME!r}. "
+            f"Response keys: {list(payload.keys())}"
+        )
+
+    repositories = user.get("repositories")
+    if not isinstance(repositories, dict):
+        raise RuntimeError(
+            "GitHub GraphQL response did not include repository data. "
+            "Check the GraphQL warnings above and the ACCESS_TOKEN permissions."
+        )
+
+    if count_type == "repos":
+        total_count = repositories.get("totalCount")
+        if total_count is None:
+            raise RuntimeError(
+                "GitHub GraphQL response did not include repositories.totalCount."
             )
+        return int(total_count)
+    elif count_type == "stars":
+        edges = repositories.get("edges") or []
+        if not isinstance(edges, list):
+            raise RuntimeError("GitHub GraphQL repositories.edges was not a list.")
+        return stars_counter(edges)
 
     return 0
 
@@ -585,12 +617,40 @@ def force_close_file(data: list[str], cache_comment: list[str]) -> None:
 
 
 def stars_counter(data: list[dict[str, Any]]) -> int:
-    """
-    Count total stars in repositories owned by me.
-    """
+    """Count stars, safely skipping repository entries that GitHub returned as null."""
     total_stars = 0
-    for node in data:
-        total_stars += node["node"]["stargazers"]["totalCount"]
+    skipped_entries = 0
+
+    for edge in data:
+        # Repository edges can contain a null node when GitHub cannot return a
+        # repository object, such as for an inaccessible/deleted repository.
+        if not isinstance(edge, dict):
+            skipped_entries += 1
+            continue
+
+        repository = edge.get("node")
+        if not isinstance(repository, dict):
+            skipped_entries += 1
+            continue
+
+        stargazers = repository.get("stargazers")
+        if not isinstance(stargazers, dict):
+            skipped_entries += 1
+            continue
+
+        star_count = stargazers.get("totalCount")
+        if not isinstance(star_count, int):
+            skipped_entries += 1
+            continue
+
+        total_stars += star_count
+
+    if skipped_entries:
+        print(
+            f"Warning: skipped {skipped_entries} repository entr"
+            f"{'y' if skipped_entries == 1 else 'ies'} because GitHub returned "
+            "missing or null star data. The displayed star total may be incomplete."
+        )
 
     return total_stars
 

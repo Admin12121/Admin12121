@@ -167,98 +167,82 @@ def graph_commits(start_date: datetime, end_date: datetime) -> int:
 def graph_repos_stars(
     count_type: Literal["repos", "stars", "loc"],
     owner_affiliation: list[str],
-    cursor: int | None = None,
+    cursor: str | None = None,
 ) -> int:
-    """
-    Uses GitHub's GraphQL v4 API to return my total repository, star, or lines
-    of code count.
-    """
+    """Count repositories through GraphQL; stars are fetched via REST instead."""
+    if count_type == "stars":
+        if owner_affiliation != ["OWNER"]:
+            raise ValueError("REST star counting supports owner repositories only")
+        return rest_repos_stars(USER_NAME)
+
     query_count("graph_repos_stars")
     query = """
     query ($owner_affiliation: [RepositoryAffiliation], $login: String!, $cursor: String) {
         user(login: $login) {
             repositories(first: 100, after: $cursor, ownerAffiliations: $owner_affiliation) {
                 totalCount
-                edges {
-                    node {
-                        ... on Repository {
-                            nameWithOwner
-                            stargazers {
-                                totalCount
-                            }
-                        }
-                    }
-                }
-                pageInfo {
-                    endCursor
-                    hasNextPage
-                }
             }
         }
     }"""
-    variables = {
-        "owner_affiliation": owner_affiliation,
-        "login": USER_NAME,
-        "cursor": cursor,
-    }
-    request = simple_request(query, variables)
-    payload = request.json()
+    payload = simple_request(
+        query,
+        {"owner_affiliation": owner_affiliation, "login": USER_NAME, "cursor": cursor},
+    ).json()
+    if payload.get("errors"):
+        raise RuntimeError(f"GitHub GraphQL repository count failed: {payload['errors']}")
+    try:
+        return int(payload["data"]["user"]["repositories"]["totalCount"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise RuntimeError("GitHub returned invalid repository count data") from exc
 
-    # GraphQL can return HTTP 200 alongside partial data and an "errors" list.
-    # Print those errors so missing/null repository nodes are diagnosable in Actions.
-    for error in payload.get("errors", []):
-        message = error.get("message", "Unknown GraphQL error")
-        path = error.get("path")
-        if path:
-            print(f"GitHub GraphQL warning (path {path}): {message}")
-        else:
-            print(f"GitHub GraphQL warning: {message}")
 
-    data = payload.get("data") or {}
-    user = data.get("user")
-    if not isinstance(user, dict):
-        raise RuntimeError(
-            f"GitHub GraphQL response did not include user data for {USER_NAME!r}. "
-            f"Response keys: {list(payload.keys())}"
-        )
+def rest_repos_stars(username: str) -> int:
+    """Sum stars from public repositories owned by username using GitHub REST.
 
-    repositories = user.get("repositories")
-    if not isinstance(repositories, dict):
-        raise RuntimeError(
-            "GitHub GraphQL response did not include repository data. "
-            "Check the GraphQL warnings above and the ACCESS_TOKEN permissions."
-        )
-
-    if count_type == "repos":
-        total_count = repositories.get("totalCount")
-        if total_count is None:
-            raise RuntimeError(
-                "GitHub GraphQL response did not include repositories.totalCount."
-            )
-        return int(total_count)
-    elif count_type == "stars":
-        # Do not turn missing/null API data into an empty list: that would
-        # silently publish a misleading star count of 0.
-        edges = repositories.get("edges")
-        if not isinstance(edges, list):
-            graph_errors = payload.get("errors", [])
-            raise RuntimeError(
-                "GitHub GraphQL did not return a valid repositories.edges list "
-                f"for the star query. totalCount={repositories.get('totalCount')!r}; "
-                f"errors={graph_errors!r}"
-            )
-
-        total_count = repositories.get("totalCount")
-        if isinstance(total_count, int) and total_count > 0 and not edges:
-            raise RuntimeError(
-                "GitHub reported repositories.totalCount="
-                f"{total_count}, but returned no repository edges for the star query. "
-                f"GraphQL errors: {payload.get('errors', [])!r}"
-            )
-
-        return stars_counter(edges)
-
-    return 0
+    The public /users/{username}/repos API exposes stargazers_count without
+    requiring GraphQL repository stargazer permissions. Pagination is mandatory.
+    Private repositories are not included in this public count.
+    """
+    url = f"https://api.github.com/users/{username}/repos?per_page=100&type=owner"
+    total_stars = 0
+    seen = set()
+    pages = 0
+    with requests.Session() as session:
+        while url:
+            response = None
+            for attempt in range(3):
+                response = session.get(
+                    url,
+                    headers={"Accept": "application/vnd.github+json",
+                             "X-GitHub-Api-Version": "2022-11-28"},
+                    timeout=30,
+                )
+                if response.status_code not in {429, 500, 502, 503, 504}:
+                    break
+                if attempt < 2:
+                    time.sleep(2 ** attempt)
+            response.raise_for_status()
+            repositories = response.json()
+            if not isinstance(repositories, list):
+                raise RuntimeError("GitHub REST repository listing is not a list")
+            for repo in repositories:
+                if not isinstance(repo, dict):
+                    raise RuntimeError("Invalid GitHub repository entry")
+                if repo.get("owner", {}).get("login", "").lower() != username.lower():
+                    continue
+                repo_id = repo.get("id")
+                count = repo.get("stargazers_count")
+                if repo_id is None or not isinstance(count, int) or isinstance(count, bool):
+                    raise RuntimeError("GitHub returned a repository without valid star data")
+                if repo_id not in seen:
+                    seen.add(repo_id)
+                    total_stars += count
+            url = response.links.get("next", {}).get("url")
+            pages += 1
+            if pages > 1000:
+                raise RuntimeError("Unexpected excessive GitHub repository pagination")
+    print(f"   stars (REST): {total_stars} across {len(seen)} public owned repositories")
+    return total_stars
 
 
 def loc_counter_one_repo(
